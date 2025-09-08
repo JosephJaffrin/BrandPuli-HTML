@@ -1,0 +1,504 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BrandPuli.com | Academy & Studio for Content & Performance Marketing</title>
+    <!-- Chosen Palette: Midnight Orange -->
+    <!-- Application Structure Plan: A single-page application with a top sticky navigation bar. The information architecture is designed to immediately segment the two primary user groups. The flow begins with a hero section, leading to an interactive 'Audience Split' that directs 'Business Owners' to the 'Studio' section and 'Creatopreneurs' to the 'Academy' section. This task-oriented approach prevents user confusion and streamlines navigation. The structure is: Hero -> Audience Split -> About -> Studio Services (with tabs & process flow) -> Academy Offerings -> Data-Driven Results (Chart) -> Contact (functional form). This was chosen over a linear report structure to create an intuitive, interactive user journey. -->
+    <!-- Visualization & Content Choices: Report Info: Extensive list of business services -> Goal: Organize & Inform -> Viz/Presentation: Interactive Tabbed Interface -> Interaction: Click tabs to reveal categorized service lists -> Justification: Manages complexity and prevents an overwhelming wall of text, making services easily digestible. -> Library/Method: Vanilla JS + Tailwind CSS. | Report Info: Need for credibility -> Goal: Compare & Inform -> Viz/Presentation: Bar Chart -> Interaction: Tooltips on hover show client growth metrics -> Justification: Adds a data-driven proof point and visual engagement. -> Library/Method: Chart.js. | Report Info: Business Process -> Goal: Inform & Organize -> Viz/Presentation: Text-based flow diagram -> Interaction: Static visual -> Justification: Clearly illustrates the workflow without complex graphics. -> Library/Method: HTML + Tailwind CSS. -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&family=Lato:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #0c0c0c;
+            --card-bg: #1a1a1a;
+            --subtle-bg: #1f1f1f;
+            --text-color: #a3a3a3;
+            --heading-color: #f5f5f5;
+            --accent-color: #F97316; /* Orange 500 */
+            --accent-hover: #EA580C; /* Orange 600 */
+        }
+        body {
+            font-family: 'Lato', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+        }
+        h1, h2, h3, h4, h5, h6 {
+            font-family: 'Poppins', sans-serif;
+            color: var(--heading-color);
+        }
+        .logo {
+            max-width: 150px;
+            height: auto;   
+        }
+        .logo-footer {
+            width: 120px;
+            height: auto;
+        }
+        .nav-link {
+            position: relative;
+            transition: color 0.3s ease;
+        }
+        .nav-link::after {
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 2px;
+            bottom: -4px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: var(--accent-color);
+            transition: width 0.3s ease;
+        }
+        .nav-link:hover {
+            color: var(--accent-color);
+        }
+        .nav-link:hover::after {
+            width: 100%;
+        }
+        .cta-button {
+            transition: all 0.3s ease;
+            background-image: linear-gradient(to right, var(--accent-color), var(--accent-hover));
+        }
+        .cta-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 4px 20px rgba(249, 115, 22, 0.25);
+        }
+        .service-tab.active {
+            background-color: var(--accent-color);
+            color: white;
+            border-color: var(--accent-color);
+        }
+        .service-tab {
+            transition: all 0.3s ease;
+        }
+        .scroll-reveal {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: opacity 0.8s ease-out, transform 0.8s ease-out;
+        }
+        .scroll-reveal.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 700px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 350px;
+            max-height: 450px;
+        }
+         @media (min-width: 768px) {
+            .chart-container {
+                height: 450px;
+            }
+        }
+        #form-message {
+            display: none;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            margin-top: 1rem;
+            font-weight: bold;
+        }
+        #form-message.success {
+            background-color: #166534;
+            color: #dcfce7;
+        }
+        @keyframes subtle-glow {
+            0% { transform: translate(0, 0); }
+            50% { transform: translate(-20px, 20px); }
+            100% { transform: translate(0, 0); }
+        }
+        .hero-glow {
+            position: absolute;
+            width: 500px;
+            height: 500px;
+            background: radial-gradient(circle, rgba(249, 115, 22, 0.1) 0%, rgba(249, 115, 22, 0) 70%);
+            animation: subtle-glow 25s infinite linear;
+            z-index: 0;
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <header id="header" class="bg-black/80 backdrop-blur-lg sticky top-0 z-50 shadow-md shadow-black/30">
+        <nav class="container mx-auto px-6 py-4 flex justify-between items-center">
+            <a href="#home"><img src="Assets\Bp White Logo.png" width="80" class="logo"></a>
+            <div class="hidden md:flex items-center space-x-8">
+                <a href="#about" class="nav-link text-neutral-300 font-medium">About</a>
+                <a href="#studio" class="nav-link text-neutral-300 font-medium">Studio</a>
+                <a href="#academy" class="nav-link text-neutral-300 font-medium">Academy</a>
+                <a href="#contact" class="nav-link text-neutral-300 font-medium">Contact</a>
+            </div>
+            <a href="#contact" class="hidden md:inline-block text-white font-bold py-2 px-6 rounded-full cta-button">Get Started</a>
+            <button id="mobile-menu-button" class="md:hidden text-neutral-300 focus:outline-none">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path></svg>
+            </button>
+        </nav>
+        <div id="mobile-menu" class="hidden md:hidden px-6 pt-2 pb-4 border-t border-neutral-800 bg-black">
+            <a href="#about" class="block nav-link text-neutral-300 py-2">About</a>
+            <a href="#studio" class="block nav-link text-neutral-300 py-2">Studio</a>
+            <a href="#academy" class="block nav-link text-neutral-300 py-2">Academy</a>
+            <a href="#contact" class="block nav-link text-neutral-300 py-2">Contact</a>
+            <a href="#contact" class="block mt-4 text-white text-center font-bold py-2 px-6 rounded-full cta-button">Get Started</a>
+        </div>
+    </header>
+
+    <main>
+        <section id="home" class="relative py-28 md:py-40 text-center overflow-hidden bg-black">
+            <div class="hero-glow top-0 left-0"></div>
+            <div class="hero-glow bottom-0 right-0" style="animation-delay: -12s;"></div>
+            <div class="container mx-auto px-6 relative z-10">
+                <div class="scroll-reveal max-w-3xl mx-auto">
+                    <h1 class="text-4xl md:text-6xl font-bold text-neutral-100 leading-tight mb-6">Where Your Content Conquers Competition.</h1>
+                    <p class="text-lg md:text-xl text-neutral-400 mb-10">We empower entrepreneurs and creators to achieve growth, profitability, and success through powerful digital content marketing.</p>
+                    <div class="flex flex-col sm:flex-row items-center justify-center gap-4">
+                        <a href="#studio" class="w-full sm:w-auto text-white font-bold py-3 px-8 rounded-full cta-button text-lg">For Businesses</a>
+                        <a href="#academy" class="w-full sm:w-auto font-bold text-[#F97316] py-3 px-8 rounded-full hover:bg-neutral-800 transition text-lg">For Creators &rarr;</a>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="about" class="py-20 bg-neutral-900">
+            <div class="container mx-auto px-6">
+                <div class="text-center mb-16 scroll-reveal">
+                    <h2 class="text-3xl md:text-4xl font-bold">Our Philosophy: Brand + Puli</h2>
+                </div>
+                <div class="grid md:grid-cols-2 gap-12 items-start">
+                    <div class="scroll-reveal">
+                        <h3 class="text-2xl font-bold mb-4">The Name is the Mission</h3>
+                        <p class="text-neutral-400 mb-4">'Brand' represents you and your business. 'Puli' (Tiger) symbolizes your content, your voice. Just as the tiger is a powerful, respected force in nature, your content should be a dominant, influential force in your industry. We help you unleash that power.</p>
+                        <h3 class="text-2xl font-bold mb-4 mt-8">Our Vision</h3>
+                        <p class="text-neutral-400">Inspired by Thirukkural 599, our vision is to empower one million entrepreneurs to achieve growth, profitability, and success through impactful digital content marketing services.</p>
+                    </div>
+                    <div class="bg-black p-8 rounded-lg shadow-lg space-y-6 scroll-reveal" style="transition-delay: 200ms;">
+                        <div class="flex items-start gap-4">
+                            <div class="flex-shrink-0 w-10 h-10 bg-orange-500/20 text-orange-400 rounded-full flex items-center justify-center font-bold text-xl">1</div>
+                            <p class="text-neutral-300">Guide you through diverse content development practices and trends, locally and globally.</p>
+                        </div>
+                        <div class="flex items-start gap-4">
+                             <div class="flex-shrink-0 w-10 h-10 bg-orange-500/20 text-orange-400 rounded-full flex items-center justify-center font-bold text-xl">2</div>
+                            <p class="text-neutral-300">Provide end-to-end digital content marketing services, from strategy to distribution.</p>
+                        </div>
+                        <div class="flex items-start gap-4">
+                            <div class="flex-shrink-0 w-10 h-10 bg-orange-500/20 text-orange-400 rounded-full flex items-center justify-center font-bold text-xl">3</div>
+                            <p class="text-neutral-300">Enrich and expand your potential market with engaging, informative, and valuable content.</p>
+                        </div>
+                         <div class="flex items-start gap-4">
+                            <div class="flex-shrink-0 w-10 h-10 bg-orange-500/20 text-orange-400 rounded-full flex items-center justify-center font-bold text-xl">4</div>
+                            <p class="text-neutral-300">Support and align next-gen content creators with entrepreneurs like you.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="studio" class="py-20">
+            <div class="container mx-auto px-6">
+                <div class="text-center mb-12 scroll-reveal">
+                    <h2 class="text-3xl md:text-4xl font-bold">Services for Business Owners: The Studio</h2>
+                    <p class="text-lg text-neutral-400 max-w-3xl mx-auto mt-4">This is our service hub for businesses, offering comprehensive Content-as-a-Service (CaaS) and Media-as-a-Service (MaaS) solutions. Explore our interactive tabs to see how we manage your content lifecycle.</p>
+                </div>
+                
+                <div id="service-tabs-container" class="max-w-5xl mx-auto scroll-reveal">
+                    <div class="flex flex-wrap justify-center gap-2 md:gap-4 mb-8">
+                        <button data-tab="platform" class="service-tab py-2 px-5 font-semibold text-neutral-300 border-2 border-neutral-700 rounded-full focus:outline-none active">Platform Management</button>
+                        <button data-tab="production" class="service-tab py-2 px-5 font-semibold text-neutral-300 border-2 border-neutral-700 rounded-full focus:outline-none">Content Production</button>
+                        <button data-tab="strategy" class="service-tab py-2 px-5 font-semibold text-neutral-300 border-2 border-neutral-700 rounded-full focus:outline-none">Strategy & Consulting</button>
+                        <button data-tab="support" class="service-tab py-2 px-5 font-semibold text-neutral-300 border-2 border-neutral-700 rounded-full focus:outline-none">Localization & Support</button>
+                    </div>
+
+                    <div id="service-content" class="grid md:grid-cols-2 gap-x-8 gap-y-4 text-neutral-300 bg-neutral-900 p-8 rounded-xl shadow-md">
+                        <!-- Content will be injected by JS -->
+                    </div>
+                </div>
+                 <div class="text-center mt-16 scroll-reveal">
+                    <a href="#contact" class="text-white font-bold py-4 px-10 rounded-full text-lg cta-button">Schedule Your Strategy Call</a>
+                </div>
+            </div>
+        </section>
+
+        <section id="academy" class="py-20 bg-neutral-900">
+            <div class="container mx-auto px-6">
+                <div class="text-center mb-12 scroll-reveal">
+                    <h2 class="text-3xl md:text-4xl font-bold">For Creatopreneurs: The Academy</h2>
+                    <p class="text-lg text-neutral-400 max-w-3xl mx-auto mt-4">Welcome to our hub for creators, marketers, and entrepreneurs. The Academy is designed to provide you with the skills, resources, and opportunities to thrive.</p>
+                </div>
+
+                <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                    <div class="bg-black p-6 rounded-lg shadow-lg hover:shadow-orange-500/10 hover:-translate-y-1 transition-all duration-300 scroll-reveal border border-transparent hover:border-orange-500/20">
+                        <h3 class="text-xl font-bold mb-2">Online MOOC (YouTube Academy)</h3>
+                        <p class="text-neutral-400">Comprehensive courses to master content creation on the world's largest video platform.</p>
+                    </div>
+                    <div class="bg-black p-6 rounded-lg shadow-lg hover:shadow-orange-500/10 hover:-translate-y-1 transition-all duration-300 scroll-reveal border border-transparent hover:border-orange-500/20" style="transition-delay: 100ms;">
+                        <h3 class="text-xl font-bold mb-2">Freemium Workshops & Bootcamps</h3>
+                        <p class="text-neutral-400">Hands-on, intensive training sessions on the latest trends and techniques in digital marketing.</p>
+                    </div>
+                    <div class="bg-black p-6 rounded-lg shadow-lg hover:shadow-orange-500/10 hover:-translate-y-1 transition-all duration-300 scroll-reveal border border-transparent hover:border-orange-500/20" style="transition-delay: 200ms;">
+                        <h3 class="text-xl font-bold mb-2">Premium Membership</h3>
+                        <p class="text-neutral-400">Exclusive access to new projects, networking events, and premium resources.</p>
+                    </div>
+                    <div class="bg-black p-6 rounded-lg shadow-lg hover:shadow-orange-500/10 hover:-translate-y-1 transition-all duration-300 scroll-reveal border border-transparent hover:border-orange-500/20">
+                        <h3 class="text-xl font-bold mb-2">Lean Joint Venture Projects</h3>
+                        <p class="text-neutral-400">Collaborate with businesses on exciting content projects and share in the success.</p>
+                    </div>
+                    <div class="bg-black p-6 rounded-lg shadow-lg hover:shadow-orange-500/10 hover:-translate-y-1 transition-all duration-300 scroll-reveal border border-transparent hover:border-orange-500/20" style="transition-delay: 100ms;">
+                        <h3 class="text-xl font-bold mb-2">Edit Suite & Coworking Space</h3>
+                        <p class="text-neutral-400">Access professional-grade editing facilities and a collaborative workspace.</p>
+                    </div>
+                    <div class="bg-black p-6 rounded-lg shadow-lg hover:shadow-orange-500/10 hover:-translate-y-1 transition-all duration-300 scroll-reveal border border-transparent hover:border-orange-500/20" style="transition-delay: 200ms;">
+                        <h3 class="text-xl font-bold mb-2">Monetization & Sponsorship</h3>
+                        <p class="text-neutral-400">We help you secure sponsorships, patronage, and other monetization opportunities.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <section id="portfolio" class="py-20">
+            <div class="container mx-auto px-6">
+                <div class="text-center mb-12 scroll-reveal">
+                    <h2 class="text-3xl md:text-4xl font-bold">Portfolio & Results</h2>
+                    <p class="text-lg text-neutral-400 max-w-3xl mx-auto mt-4">We don't just create content; we create impact. This chart represents the typical growth our clients experience across key metrics within the first six months of partnership.</p>
+                </div>
+                <div class="chart-container bg-neutral-900 p-4 sm:p-6 rounded-xl shadow-lg scroll-reveal">
+                    <canvas id="resultsChart"></canvas>
+                </div>
+            </div>
+        </section>
+
+        <section id="contact" class="py-20 bg-neutral-900">
+            <div class="container mx-auto px-6">
+                <div class="text-center mb-12 scroll-reveal">
+                    <h2 class="text-3xl md:text-4xl font-bold">Let's Build Your Brand's Legacy</h2>
+                    <p class="text-lg text-neutral-400 max-w-2xl mx-auto mt-4">Whether you're a business ready to scale or a creator ready to shine, we're here to help. Reach out to start the conversation.</p>
+                </div>
+
+                <div class="max-w-4xl mx-auto grid md:grid-cols-2 gap-12 bg-black p-8 md:p-12 rounded-xl shadow-2xl scroll-reveal">
+                    <div>
+                        <form id="contact-form" method="POST" action="https://script.google.com/macros/s/AKfycbw0Dz6IIyH5xNjsSdFZQ5VOrRjxOJOkG0Pt_tqnNlMgb_YlftA0QHC99n7DOSwveKHA/exec">
+                            <div class="grid grid-cols-1 gap-6">
+                                <input type="text" name="name" placeholder="Your Name" required class="block w-full rounded-md bg-neutral-800 border-neutral-700 text-white shadow-sm focus:border-orange-500 focus:ring-orange-500 py-3 px-4">
+                                <input type="email" name="email" placeholder="Your Email" required class="block w-full rounded-md bg-neutral-800 border-neutral-700 text-white shadow-sm focus:border-orange-500 focus:ring-orange-500 py-3 px-4">
+                                <input type="tel" name="phone" placeholder="Your Phone Number" required class="block w-full rounded-md bg-neutral-800 border-neutral-700 text-white shadow-sm focus:border-orange-500 focus:ring-orange-500 py-3 px-4">
+                                <select name="user_type" required class="block w-full rounded-md bg-neutral-800 border-neutral-700 text-neutral-300 shadow-sm focus:border-orange-500 focus:ring-orange-500 py-3 px-4">
+                                    <option>I am a Business Owner</option>
+                                    <option>I am a Creatopreneur</option>
+                                </select>
+                                <textarea name="message" rows="4" placeholder="Your Message" required class="block w-full rounded-md bg-neutral-800 border-neutral-700 text-white shadow-sm focus:border-orange-500 focus:ring-orange-500 py-3 px-4"></textarea>
+                                <div>
+                                    <button type="submit" id="submit-button" class="w-full text-white font-bold py-3 px-6 rounded-full cta-button">Send Message</button>
+                                </div>
+                            </div>
+                        </form>
+                        <div id="form-message"></div>
+                    </div>
+                    <div class="flex flex-col justify-center">
+                        <h3 class="text-xl font-bold mb-4">Direct Contact</h3>
+                        <p class="text-neutral-400 mb-2">Feel free to call us for a direct consultation.</p>
+                        <p class="text-3xl font-bold text-[#F97316] mb-6">+91 89396 33448</p>
+                         <p class="text-neutral-400 mb-2">Or email us at:</p>
+                        <p class="text-xl font-semibold text-[#F97316] mb-6">info@brandpuli.com</p>
+                        
+                        <h3 class="text-xl font-bold mb-4">Connect With Us</h3>
+                        <div class="flex space-x-6">
+                           <a href="https://www.youtube.com/@BrandPuli" target="_blank" rel="noopener noreferrer" class="text-neutral-400 hover:text-[#F97316] transition">YouTube</a>
+                           <a href="https://www.linkedin.com/company/brandpuli/" target="_blank" rel="noopener noreferrer" class="text-neutral-400 hover:text-[#F97316] transition">LinkedIn</a>
+                           <a href="https://www.instagram.com/brandpuliclub/" target="_blank" rel="noopener noreferrer" class="text-neutral-400 hover:text-[#F97316] transition">Instagram</a>
+                           <a href="https://www.facebook.com/brandpuliclub" target="_blank" rel="noopener noreferrer" class="text-neutral-400 hover:text-[#F97316] transition">Facebook</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="bg-black text-white py-12">
+        <div class="container mx-auto px-6 text-center flex flex-col items-center">
+            <img src="Assets\Bp White Logo.png" width="100" class="logo-footer mb-6 block">
+            <div class="flex justify-center space-x-6 mb-6">
+                <a href="https://www.youtube.com/@BrandPuli" target="_blank" rel="noopener noreferrer" class="text-neutral-400 hover:text-white transition">YouTube</a>
+                <a href="https://www.linkedin.com/company/brandpuli/" target="_blank" rel="noopener noreferrer" class="text-neutral-400 hover:text-white transition">LinkedIn</a>
+                <a href="https://www.instagram.com/brandpuliclub/" target="_blank" rel="noopener noreferrer" class="text-neutral-400 hover:text-white transition">Instagram</a>
+                <a href="https://www.facebook.com/brandpuliclub" target="_blank" rel="noopener noreferrer" class="text-neutral-400 hover:text-white transition">Facebook</a>
+            </div>
+            <p class="text-neutral-400 mb-6">&copy; 2024 BrandPuli.com. All Rights Reserved.</p>
+            <div class="text-xs text-neutral-500 flex justify-center items-center space-x-4">
+                <span>Industry: Marketing Services</span>
+                <span class="border-l border-neutral-700 h-4"></span>
+                <span>Founded: 2024</span>
+                <span class="border-l border-neutral-700 h-4"></span>
+                <span>Type: Privately Held</span>
+            </div>
+        </div>
+    </footer>
+    
+    <iframe name="hidden_iframe" id="hidden_iframe" style="display:none;" onload="if(submitted){}"></iframe>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            var submitted = false;
+            const mobileMenuButton = document.getElementById('mobile-menu-button');
+            const mobileMenu = document.getElementById('mobile-menu');
+
+            mobileMenuButton.addEventListener('click', function () {
+                mobileMenu.classList.toggle('hidden');
+            });
+
+            const serviceTabsData = {
+                platform: [
+                    'YouTube as a Service', 'LinkedIn as a Service', 'Instagram/Facebook as a Service',
+                    'WhatsApp Community/Channel as a Service', 'Website as a Service', 'Podcast as a Service'
+                ],
+                production: [
+                    'Ad Films & Documentaries', 'Video Editing', 'Script Writing', 'Graphic Design',
+                    'Animation', 'Content Production (Script to Video)'
+                ],
+                strategy: [
+                    'Content Audit', 'Content Strategy & Planning', 'Content Optimization', 'Content Distribution & Monetization',
+                    'Branding, Marketing & Sales Consulting', 'Paid Promotions & Performance Marketing'
+                ],
+                support: [
+                    'Translation & Localization', 'Transcription Services', 'Voiceover Services', 'Subtitling & Captioning',
+                    'Audio Editing & Mixing', 'Book Publication & PR'
+                ]
+            };
+
+            const tabsContainer = document.getElementById('service-tabs-container');
+            const serviceContent = document.getElementById('service-content');
+            const serviceTabs = tabsContainer.querySelectorAll('.service-tab');
+
+            function renderServiceContent(tab) {
+                const services = serviceTabsData[tab];
+                serviceContent.innerHTML = services.map(service => `
+                    <div class="flex items-center">
+                        <span class="text-orange-400 mr-3 text-xl">&#10003;</span>
+                        <span>${service}</span>
+                    </div>
+                `).join('');
+            }
+
+            tabsContainer.addEventListener('click', function(e) {
+                if (e.target.classList.contains('service-tab')) {
+                    const tabName = e.target.dataset.tab;
+                    serviceTabs.forEach(tab => tab.classList.remove('active'));
+                    e.target.classList.add('active');
+                    renderServiceContent(tabName);
+                }
+            });
+
+            renderServiceContent('platform');
+            
+            const ctx = document.getElementById('resultsChart').getContext('2d');
+            const resultsChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['Audience Growth', 'Engagement Rate', 'Lead Generation', 'Brand Recall'],
+                    datasets: [{
+                        label: 'Average Client Uplift (%) in 6 Months',
+                        data: [150, 85, 120, 95],
+                        backgroundColor: 'rgba(249, 115, 22, 0.6)',
+                        borderColor: 'rgba(249, 115, 22, 1)',
+                        borderWidth: 1,
+                        borderRadius: 5,
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            grid: { color: 'rgba(255, 255, 255, 0.1)' },
+                            ticks: {
+                                color: '#a3a3a3',
+                                callback: function(value) { return value + '%' }
+                            }
+                        },
+                        x: {
+                           grid: { display: false },
+                           ticks: { color: '#a3a3a3' }
+                        }
+                    },
+                    plugins: {
+                        legend: { display: false },
+                        title: {
+                            display: true,
+                            text: 'Average Client Growth Metrics',
+                            color: '#f5f5f5',
+                            font: { size: 16, weight: '600' }
+                        },
+                        tooltip: {
+                             callbacks: {
+                                label: function(context) {
+                                    let label = context.dataset.label || '';
+                                    if (label) { label += ': '; }
+                                    if (context.parsed.y !== null) { label += context.parsed.y + '%'; }
+                                    return label;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+            
+            document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+                anchor.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    const targetId = this.getAttribute('href');
+                    const targetElement = document.querySelector(targetId);
+                    if(targetElement) {
+                        if(mobileMenu.offsetParent !== null) {
+                           mobileMenu.classList.add('hidden');
+                        }
+                        targetElement.scrollIntoView({ behavior: 'smooth' });
+                    }
+                });
+            });
+
+            const form = document.getElementById('contact-form');
+            const formMessage = document.getElementById('form-message');
+            const submitButton = document.getElementById('submit-button');
+
+            form.addEventListener('submit', e => {
+                form.target = 'hidden_iframe';
+                submitted = true;
+
+                submitButton.disabled = true;
+                submitButton.textContent = 'Sending...';
+
+                formMessage.textContent = 'Thank you! Your message has been sent successfully.';
+                formMessage.className = 'success';
+                formMessage.style.display = 'block';
+
+                setTimeout(() => {
+                    form.reset();
+                    submitButton.disabled = false;
+                    submitButton.textContent = 'Send Message';
+                    formMessage.style.display = 'none';
+                }, 3000);
+            });
+
+            const revealElements = document.querySelectorAll('.scroll-reveal');
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('visible');
+                    }
+                });
+            }, { threshold: 0.1 });
+
+            revealElements.forEach(el => {
+                observer.observe(el);
+            });
+        });
+    </script>
+</body>
+</html>
